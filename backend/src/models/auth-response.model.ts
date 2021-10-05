@@ -5,10 +5,13 @@ import { User, UserDocument } from './user.model';
 export class AuthResponse {
   @Field(() => Boolean)
   success: boolean;
+
   @Field(() => User)
   user: UserDocument;
+
   @Field()
   message: string;
+
   @Field()
   token: string;
 }

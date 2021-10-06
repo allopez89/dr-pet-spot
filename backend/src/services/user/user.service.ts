@@ -35,13 +35,13 @@ export class UserService {
     return (await this.userRepo.create(user)) as UserDocument;
   }
 
-  async getUserIdByToken(token: string): Promise<any> {
-    const userId = await this.jwtService.verify(token, {
-      secret: String(process.env['JWT_SECRET']),
-    });
+  // async getUserIdByToken(token: string): Promise<any> {
+  //   const userId = await this.jwtService.verify(token, {
+  //     secret: String(process.env['JWT_SECRET']),
+  //   });
 
-    return userId;
-  }
+  //   return userId;
+  // }
 
   async getUserByEmail(email: string): Promise<User | null> {
     return await this.userRepo.findOne({ email }, {}, '+password');

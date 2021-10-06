@@ -1,0 +1,90 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthResponse {
+  message: String!
+  success: Boolean!
+  token: String!
+  user: User!
+}
+
+input CreatePetPostInput {
+  age: String!
+  description: String!
+  image: String!
+  lastSeenAt: String!
+  name: String!
+  reward: String!
+}
+
+input CreateUserInput {
+  email: String!
+  lastName: String!
+  name: String!
+  password: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createPetPost(createPetPostInput: CreatePetPostInput!): PetPost!
+  deletePetPost(_id: String!): Boolean!
+  signIn(signInInput: SignInInput!): AuthResponse!
+  signUp(createUserInput: CreateUserInput!): AuthResponse!
+  updatePetPost(updatePetPostInput: UpdatePetPostInput!): PetPost!
+}
+
+type PetPost {
+  _id: String!
+  age: String!
+  createdAt: DateTime!
+  description: String!
+  image: String!
+  lastSeenAt: String!
+  name: String!
+  publisher: PublishedBy!
+  reward: String!
+  updatedAt: DateTime!
+}
+
+type PublishedBy {
+  _id: String!
+  name: String!
+}
+
+type Query {
+  findAllPetPosts: [PetPost!]!
+  findPetPostById(_id: String!): PetPost!
+  findUserById(_id: String!): User!
+  getCurrentUser: User!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input UpdatePetPostInput {
+  _id: String!
+  age: String!
+  description: String!
+  image: String!
+  lastSeenAt: String!
+  name: String!
+  reward: String!
+}
+
+type User {
+  _id: String!
+  createdAt: DateTime!
+  email: String!
+  lastName: String!
+  name: String!
+  password: String!
+  petPosts: [String!]!
+  updatedAt: DateTime!
+}

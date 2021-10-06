@@ -1,24 +1,27 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Context } from '@nestjs/graphql';
 import { CreateUserInput } from 'src/dtos/users/create-user.input';
 import { User } from 'src/models/user.model';
 import { UserDocument } from '../../models/user.model';
 import { AuthResponse } from '../../models/auth-response.model';
 import { SignInInput } from '../../dtos/users/sign-in.input';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { UserService } from 'src/services/user/user.service';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Query(() => User)
+  @UseGuards(AuthGuard)
   async findUserById(@Args('_id') _id: string): Promise<User> {
     return await this.userService.findById(_id);
   }
 
   @Query(() => User)
-  async getCurrentUser(@Args('token') token: string): Promise<User> {
-    return await this.userService.getUserIdByToken(token);
+  @UseGuards(AuthGuard)
+  async getCurrentUser(@Context('user') user: User): Promise<User> {
+    return user;
   }
 
   @Mutation(() => AuthResponse)

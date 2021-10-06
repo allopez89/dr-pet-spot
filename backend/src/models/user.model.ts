@@ -1,7 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import { PetPostDocument } from './pet-post.model';
 
-import { Document } from 'mongoose';
+const { ObjectId } = Types;
 
 export type UserDocument = User & Document;
 
@@ -34,6 +36,10 @@ export class User {
     select: false,
   })
   password: string;
+
+  @Field(() => [String])
+  @Prop([{ type: ObjectId, ref: 'PetPost' }])
+  petPosts: Array<PetPostDocument['_id']>;
 
   @Field(() => Date)
   createdAt: Date;

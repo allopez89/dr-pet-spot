@@ -1,8 +1,11 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { PetPostService } from '../../services/pet-post/pet-post.service';
-import { PetPost } from '../../models/pet-post.model';
+import { PetPost, PetPostDocument } from '../../models/pet-post.model';
 import { CreatePetPostInput } from '../../dtos/pet-post/create-pet-post.input';
 import { UpdatePetPostInput } from '../../dtos/pet-post/update-pet-post.input copy';
+import { User, UserDocument } from '../../models/user.model';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../../guards/auth.guard';
 
 @Resolver()
 export class PetPostResolver {
@@ -19,21 +22,44 @@ export class PetPostResolver {
   }
 
   @Mutation(() => PetPost)
+  @UseGuards(AuthGuard)
   async createPetPost(
     @Args('createPetPostInput') createPetPostInput: CreatePetPostInput,
+    @Context('user') user: User,
   ): Promise<PetPost | null> {
-    return await this.petPostService.create(createPetPostInput);
+    const petPost: PetPost | null = await this.petPostService.create(
+      createPetPostInput,
+      user,
+    );
+
+    await this.petPostService.linkPetPostWithUser(
+      petPost as PetPostDocument,
+      user as UserDocument,
+    );
+
+    return petPost;
   }
 
+  @UseGuards(AuthGuard)
   @Mutation(() => PetPost)
   async updatePetPost(
-    @Args('updatePetPostInput') updatePetPostInput: UpdatePetPostInput,
+    @Args('updatePetPostInput')
+    petPost: UpdatePetPostInput,
+    @Context('user') { _id: userId }: User,
   ): Promise<PetPost> {
-    return await this.petPostService.updateOne(updatePetPostInput);
+    await this.petPostService.validatePostMutation(petPost._id, userId);
+
+    return await this.petPostService.updateOne(petPost);
   }
 
-  @Mutation(() => PetPost)
-  async deletePetPost(_id: string): Promise<boolean> {
+  @Mutation(() => Boolean)
+  @UseGuards(AuthGuard)
+  async deletePetPost(
+    @Args('_id') _id: string,
+    @Context('user') { _id: userId }: User,
+  ): Promise<boolean> {
+    await this.petPostService.validatePostMutation(_id, userId);
+
     return await this.petPostService.deleteOne(_id);
   }
 }

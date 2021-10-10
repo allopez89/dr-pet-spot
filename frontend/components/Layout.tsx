@@ -13,13 +13,6 @@ const Layout: FC = ({ children }): JSX.Element => {
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.16/tailwind.min.css"
-          integrity="sha512-5D0ofs3AsWoKsspH9kCWlY7qGxnHvdN/Yz2rTNwD9L271Mno85s+5ERo03qk9SUNtdgOZ4A9t8kRDexkvnWByA=="
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
 
         <meta name="description" content="Report lost animals" />
         <link rel="icon" href="/favicon.ico" />

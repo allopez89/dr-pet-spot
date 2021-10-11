@@ -1,6 +1,7 @@
-import { FC, useEffect } from "react";
-
+import { FC, useEffect, useState } from "react";
+import { useMutation, gql } from "@apollo/client";
 import { useForm, useWatch } from "react-hook-form";
+import { NextRouter, useRouter } from "next/router";
 
 type FormData = {
   email: string;
@@ -8,7 +9,29 @@ type FormData = {
   password: string;
 };
 
+const MUTATION_SIGNIN = gql`
+  mutation signIn($signInInput: SignInInput!) {
+    signIn(signInInput: $signInInput) {
+      user {
+        name
+        email
+      }
+      message
+      token
+    }
+  }
+`;
+
+interface CustomError {
+  message: string | undefined;
+} 
+
 const SignIn: FC = () => {
+  const [signIn] = useMutation(MUTATION_SIGNIN);
+  const [customError, setCustomError] = useState<CustomError>({message: undefined});
+
+  const router: NextRouter = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -28,13 +51,29 @@ const SignIn: FC = () => {
     name: "password",
   });
 
-  useEffect((): void => {
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-  }, []);
+  useEffect(() => {
+    setCustomError(null);
+  }, [email, password]);
 
-  useEffect((): void => {}, [email, password]);
+  const onSubmit = handleSubmit(async (data): Promise<void> => {
+    try {
+      setCustomError(null);
 
-  const onSubmit = handleSubmit(async (data): Promise<void> => {});
+      await signIn({
+        variables: {
+          signInInput: {
+            email: data.email,
+            password: data.password,
+          },
+        },
+      });
+
+      router.push("/")      
+    } catch (error) {
+      setCustomError(()=> ({message: error?.message}));
+      console.log(error.message);
+    }
+  });
 
   return (
     <div
@@ -133,23 +172,16 @@ const SignIn: FC = () => {
                   />
                 </svg>
               </span>
-              Sign Up
-              {/* {isPending() && (
-                <div className="animate-spin h-5 w-5 mr-3">
-                  <i className="fas fa-spinner"></i>
-                </div>
-              )}
-              {isPending() ? "Loading..." : "Sign Up"} */}
+              Sign In
             </button>
           </div>
+          
+          {customError && customError.message ? (
+            <p className="text-red-500 font-semibold"> {customError.message}</p>
+          ) : null}
+
           <div className="flex items-center justify-between mt-4">
             <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4" />
-            {/* <RouteLink
-              to="/auth/sign-in"
-              className="text-xs text-blue-500 uppercase dark:text-gray-400 hover:underline"
-            >
-              or sign in
-            </RouteLink> */}
             <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4" />
           </div>
         </form>

@@ -13,6 +13,7 @@ const MUTATION_SIGNIN = gql`
   mutation signIn($signInInput: SignInInput!) {
     signIn(signInInput: $signInInput) {
       user {
+        _id
         name
         email
       }
@@ -24,11 +25,13 @@ const MUTATION_SIGNIN = gql`
 
 interface CustomError {
   message: string | undefined;
-} 
+}
 
 const SignIn: FC = () => {
   const [signIn] = useMutation(MUTATION_SIGNIN);
-  const [customError, setCustomError] = useState<CustomError>({message: undefined});
+  const [customError, setCustomError] = useState<CustomError>({
+    message: undefined,
+  });
 
   const router: NextRouter = useRouter();
 
@@ -59,7 +62,7 @@ const SignIn: FC = () => {
     try {
       setCustomError(null);
 
-      await signIn({
+      const { data: result } = await signIn({
         variables: {
           signInInput: {
             email: data.email,
@@ -68,9 +71,12 @@ const SignIn: FC = () => {
         },
       });
 
-      router.push("/")      
+      localStorage.setItem("token", result.signIn.token);
+      localStorage.setItem("userId", result.signIn.user._id);
+
+      router.push("/");
     } catch (error) {
-      setCustomError(()=> ({message: error?.message}));
+      setCustomError(() => ({ message: error?.message }));
       console.log(error.message);
     }
   });
@@ -175,7 +181,7 @@ const SignIn: FC = () => {
               Sign In
             </button>
           </div>
-          
+
           {customError && customError.message ? (
             <p className="text-red-500 font-semibold"> {customError.message}</p>
           ) : null}

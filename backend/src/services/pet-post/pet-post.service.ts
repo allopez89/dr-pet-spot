@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PetPostRepository } from '../../repositories/pet-post.repository';
 import { PetPost, PetPostDocument } from '../../models/pet-post.model';
 import { CreatePetPostInput } from 'src/dtos/pet-post/create-pet-post.input';
@@ -77,7 +81,12 @@ export class PetPostService {
     petPost: PetPostDocument,
     user: UserDocument,
   ): Promise<void> {
+    if (!user.petPosts) user.petPosts = [];
+
     user.petPosts.push(petPost._id);
+
+    console.log(user);
+    
 
     await user.save();
   }

@@ -81,7 +81,7 @@ const SignUp: FC = () => {
           "The full name is required. Example: 'Porfirio Rodríguez'."
         );
 
-      await signUp({
+      const { data: result } = await signUp({
         variables: {
           createUserInput: {
             name: firstName,
@@ -92,7 +92,9 @@ const SignUp: FC = () => {
         },
       });
 
-      // notification.success("User created successfully!");
+      localStorage.setItem("token", result.signUp.token);
+
+      localStorage.setItem("userId", result.signUp.user._id);
 
       router.push("/");
     } catch (error) {

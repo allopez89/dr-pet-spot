@@ -6,10 +6,14 @@ import { UpdatePetPostInput } from '../../dtos/pet-post/update-pet-post.input co
 import { User, UserDocument } from '../../models/user.model';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../guards/auth.guard';
+import { UserService } from '../../services/user/user.service';
 
 @Resolver()
 export class PetPostResolver {
-  constructor(private readonly petPostService: PetPostService) {}
+  constructor(
+    private readonly petPostService: PetPostService,
+    private readonly userService: UserService,
+  ) {}
 
   @Query(() => [PetPost])
   async findAllPetPosts(): Promise<PetPost[]> {
@@ -32,9 +36,13 @@ export class PetPostResolver {
       user,
     );
 
+    const userFound: UserDocument = (await this.userService.findById(
+      user._id,
+    )) as UserDocument;
+
     await this.petPostService.linkPetPostWithUser(
       petPost as PetPostDocument,
-      user as UserDocument,
+      userFound,
     );
 
     return petPost;
@@ -44,12 +52,15 @@ export class PetPostResolver {
   @Mutation(() => PetPost)
   async updatePetPost(
     @Args('updatePetPostInput')
-    petPost: UpdatePetPostInput,
+    updatePetPostInput: UpdatePetPostInput,
     @Context('user') { _id: userId }: User,
   ): Promise<PetPost> {
-    await this.petPostService.validatePostMutation(petPost._id, userId);
+    await this.petPostService.validatePostMutation(
+      updatePetPostInput._id,
+      userId,
+    );
 
-    return await this.petPostService.updateOne(petPost);
+    return await this.petPostService.updateOne(updatePetPostInput);
   }
 
   @Mutation(() => Boolean)

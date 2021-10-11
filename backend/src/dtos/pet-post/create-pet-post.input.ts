@@ -27,6 +27,11 @@ export class CreatePetPostInput {
   @Field()
   readonly image: string;
 
+  @IsNotEmpty()
+  @IsDefined({ message: "The 'contact details' field is required." })
+  @Field()
+  readonly contactDetails: string;
+
   @Field()
   readonly reward: string;
 }

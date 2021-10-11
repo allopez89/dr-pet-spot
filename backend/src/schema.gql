@@ -11,6 +11,7 @@ type AuthResponse {
 
 input CreatePetPostInput {
   age: String!
+  contactDetails: String!
   description: String!
   image: String!
   lastSeenAt: String!
@@ -41,6 +42,7 @@ type Mutation {
 type PetPost {
   _id: String!
   age: String!
+  contactDetails: String!
   createdAt: DateTime!
   description: String!
   image: String!
@@ -71,6 +73,7 @@ input SignInInput {
 input UpdatePetPostInput {
   _id: String!
   age: String!
+  contactDetails: String!
   description: String!
   image: String!
   lastSeenAt: String!

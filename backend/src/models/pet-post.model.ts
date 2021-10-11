@@ -53,6 +53,13 @@ export class PetPost {
     name: string;
   };
 
+  @Field( )
+  @Prop({
+    type: String,
+    required: [true, 'The contact details field is required.']
+  })
+  contactDetails: string;
+
   @Field(() => Date)
   createdAt: Date;
 

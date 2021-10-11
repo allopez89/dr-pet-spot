@@ -1,5 +1,7 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { useMutation, gql } from "@apollo/client";
+import { NextRouter, useRouter } from "next/router";
 
 type FormData = {
   email: string;
@@ -7,7 +9,25 @@ type FormData = {
   password: string;
 };
 
+const MUTATION_SIGNUP = gql`
+  mutation signUp($createUserInput: CreateUserInput!) {
+    signUp(createUserInput: $createUserInput) {
+      user {
+        _id
+        name
+      }
+      message
+      token
+    }
+  }
+`;
+
 const SignUp: FC = () => {
+  const [signUp] = useMutation(MUTATION_SIGNUP);
+  const [customError, setCustomError] = useState<any>();
+
+  const router: NextRouter = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -32,13 +52,54 @@ const SignUp: FC = () => {
     name: "password",
   });
 
+  useEffect(() => {
+    setCustomError(null);
+  }, [name, email, password]);
+
   useEffect((): void => {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
   }, []);
 
-  useEffect((): void => {}, [name, email, password]);
+  useEffect((): void => setCustomError(null), [name, email, password]);
 
-  const onSubmit = handleSubmit(async (data): Promise<void> => {});
+  const getFullName = (name: string) => name.split(" ");
+
+  const isFullNameEntered = (firstName: string, lastName: string): boolean => {
+    return Boolean(firstName) && Boolean(lastName);
+  };
+
+  const onSubmit = handleSubmit(async (data): Promise<void> => {
+    try {
+      setCustomError(null);
+
+      const [firstName, lastName] = getFullName(data.name);
+
+      const isFullNameValid: boolean = isFullNameEntered(firstName, lastName);
+
+      if (!isFullNameValid)
+        return setCustomError(
+          "The full name is required. Example: 'Porfirio Rodríguez'."
+        );
+
+      await signUp({
+        variables: {
+          createUserInput: {
+            name: firstName,
+            lastName: lastName,
+            email,
+            password,
+          },
+        },
+      });
+
+      // notification.success("User created successfully!");
+
+      router.push("/");
+    } catch (error) {
+      setCustomError(error && error.message ? error.message : error);
+      console.log(error.message);
+    }
+  });
 
   return (
     <div
@@ -157,8 +218,15 @@ const SignUp: FC = () => {
               Sign Up
             </button>
           </div>
+
+          {customError && customError.message ? (
+            <p className="text-red-500 font-semibold"> {customError.message}</p>
+          ) : customError ? (
+            <p className="text-red-500 font-semibold"> {customError}</p>
+          ) : null}
+
           <div className="flex items-center justify-between mt-4">
-            <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4" />
+            <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
             <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4" />
           </div>
         </form>
